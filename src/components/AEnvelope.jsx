@@ -5,19 +5,18 @@ import { motion, AnimatePresence } from 'framer-motion'
 import envelopeClosed from '../assets/envelope_closed.png'
 import envelopeOpened from '../assets/envelope_opened.png'
 
-// Mood/Decoration Images
+// Mood / Decorations
 import dash1 from '../assets/dash1.png'
 import dash3 from '../assets/dash3.png'
-import painIcon from '../assets/pain.png'   
-import happyIcon from '../assets/happy.png' 
-import notesBg from '../assets/notes-bg.png' // <-- NEW: Import note background
+import painIcon from '../assets/pain.png'
+import happyIcon from '../assets/happy.png'
+import notesBg from '../assets/notes-bg.png' // Restored background for note card
 
-// --- GROQ API SETUP (Using the confirmed working model) ---
+// --- GROQ API SETUP ---
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const MODEL_NAME = 'llama-3.1-8b-instant' 
+const MODEL_NAME = 'llama-3.1-8b-instant'
 // --- END GROQ SETUP ---
-
 
 function AEnvelope({ phaseInfo }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -93,55 +92,22 @@ function AEnvelope({ phaseInfo }) {
 
   return (
     <div className="flex flex-col items-center justify-center mt-12 mb-8">
-      <div className="relative w-[700px] h-96 flex items-center justify-center">
-        {/* MOOD ICON */}
-        <motion.img
-          src={isOpen ? happyIcon : painIcon}
-          alt={isOpen ? 'Happy icon' : 'Pain icon'}
-          className="absolute w-80 h-auto object-contain z-10"
-          style={{ right: '-10%' }}
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1.1, opacity: 1 }}
-          transition={{ duration: 0.5, type: 'spring', delay: 0.2 }}
-        />
-
-        {/* MOOD TEXT */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={isOpen ? 'happy-text' : 'pain-text'}
-            className="absolute w-40 text-left font-cute z-10"
-            style={{ left: '60%', top: '50%', transform: 'translateY(-50%)' }}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            <p
-              className={`text-lg font-cute ${
-                isOpen ? 'text-pink-600' : 'text-red-600'
-              }`}
-            >
-              {isOpen
-                ? 'Yay! I feel so much better now after reading this!'
-                : 'Ugh, ahh, these cramps are so painful...'}
-            </p>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* ENVELOPE SECTION */}
+      <div className="relative w-[900px] h-96 flex items-center justify-start gap-10">
+        {/* ENVELOPE SECTION (Left) */}
         <div
-          className="absolute left-0 w-[420px] h-96 flex flex-col items-center justify-center"
+          className="relative left-0 w-[420px] h-96 flex flex-col items-center justify-center"
           onClick={handleOpen}
         >
           <div className="relative w-full h-full flex items-center justify-center pt-20">
+            {/* NOTE CARD (Restored Beige & Lined UI) */}
             <motion.div
-              // FIX: Reverted UI to use background image, removing the custom CSS class/logic
-              className={`absolute w-[420px] h-[260px] bg-white rounded-2xl shadow-xl p-8 z-10 flex items-center justify-center relative overflow-hidden`}
+              className="absolute w-[420px] h-[260px] rounded-2xl shadow-xl z-10 flex items-center justify-center relative overflow-hidden"
               style={{
-                backgroundImage: `url(${notesBg})`, // <-- Use the note background image
-                backgroundSize: 'contain',
+                backgroundColor: '#fefce8',
+                border: '1px solid #dcb58a',
+                backgroundImage: `url(${notesBg})`,
+                backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
-                padding: '2rem 1.5rem 2rem 1.5rem', // Adjusted padding for text placement on image
               }}
               initial={{ y: 40, opacity: 0, scale: 0.8 }}
               animate={{
@@ -151,22 +117,11 @@ function AEnvelope({ phaseInfo }) {
               }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
             >
-              {/* Note Content */}
-              {/* Moved internal decorations (dash1, dash3) to external div for better layout control */}
-              
-              <p 
-                className="font-sans text-lg text-center text-yellow-900 leading-relaxed z-20 relative w-full h-full pt-10 px-6"
-                // Adjusted text styling to fit within the lines of the background image
-                style={{ fontFamily: 'Georgia, serif', color: '#713f12' }} // Match text color to line color
-              >
-                {quote}
-              </p>
-
-              {/* Added internal decorations back as floating elements over the text */}
+              {/* Dash Icons */}
               <motion.img
                 src={dash1}
                 alt=""
-                className="absolute top-2 left-2 w-16 opacity-0"
+                className="absolute top-2 left-2 w-16 opacity-80 z-0"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: isOpen ? 0.8 : 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
@@ -174,12 +129,23 @@ function AEnvelope({ phaseInfo }) {
               <motion.img
                 src={dash3}
                 alt=""
-                className="absolute bottom-2 right-2 w-16 opacity-0"
+                className="absolute bottom-2 right-2 w-16 opacity-80 z-0"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: isOpen ? 0.8 : 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               />
 
+              {/* Text Inside Note */}
+              <p
+                className="font-sans text-lg text-center leading-relaxed z-20 relative w-full h-full pt-10 px-6"
+                style={{
+                  fontFamily: 'Georgia, serif',
+                  color: '#713f12',
+                  textShadow: '0.5px 0.5px #e7d3a1',
+                }}
+              >
+                {quote}
+              </p>
             </motion.div>
 
             {/* Envelope Image */}
@@ -192,7 +158,7 @@ function AEnvelope({ phaseInfo }) {
               style={{ bottom: '0' }}
             />
 
-            {/* Text Below Envelope */}
+            {/* Below Text */}
             <p className="absolute bottom-[-25px] text-pink-700 text-lg font-cute w-full text-center z-30">
               {isOpen
                 ? "Here's your note 💌"
@@ -200,6 +166,32 @@ function AEnvelope({ phaseInfo }) {
             </p>
           </div>
         </div>
+
+        {/* MOOD ICON (Middle) */}
+        <motion.img
+          src={isOpen ? happyIcon : painIcon}
+          alt={isOpen ? 'Happy icon' : 'Pain icon'}
+          className="w-72 h-auto object-contain"
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1.05 }}
+          transition={{ duration: 0.5, type: 'spring' }}
+        />
+
+        {/* MOOD TEXT (Right) */}
+        <motion.p
+          key={isOpen ? 'happy-text' : 'pain-text'}
+          className={`text-xl font-cute max-w-xs ${
+            isOpen ? 'text-pink-600' : 'text-red-600'
+          }`}
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -10 }}
+          transition={{ duration: 0.5 }}
+        >
+          {isOpen
+            ? 'Yay! I feel so much better now after reading this!'
+            : 'Ugh, ahh, these cramps are so painful...'}
+        </motion.p>
       </div>
     </div>
   )
