@@ -12,8 +12,10 @@ import dash2 from '../assets/dash2.png'
 import dash4 from '../assets/dash4.png'
 import arrowDown from '../assets/arrow-down.png'
 
+// --- PHASE LOGIC ---
 function getPhaseInfo(selectedDate, latestCycle) {
-  if (!latestCycle) return { name: 'Loading', dayOfPhase: 0, dayOfCycle: 0, cycle_length: 28 }
+  if (!latestCycle)
+    return { name: 'Loading', dayOfPhase: 0, dayOfCycle: 0, cycle_length: 28 }
 
   const { start_date, cycle_length, period_length } = latestCycle
   const parsedStartDate = startOfDay(parseISO(start_date))
@@ -34,6 +36,7 @@ function getPhaseInfo(selectedDate, latestCycle) {
   return { name: 'Luteal', dayOfPhase: dayOfCycle - 15, dayOfCycle, cycle_length }
 }
 
+// --- NEXT PERIOD CALCULATION ---
 const calculateNextPeriodStart = (latestCycle) => {
   if (!latestCycle) return null
   const { start_date, cycle_length } = latestCycle
@@ -46,14 +49,27 @@ function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [loading, setLoading] = useState(true)
 
+  // ✅ FIX: calendar focuses on next predicted period month
   useEffect(() => {
     const fetchLatestCycle = async () => {
+      setLoading(true)
       const { data, error } = await supabase
         .from('cycles')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1)
-      if (!error && data?.length > 0) setLatestCycle(data[0])
+
+      if (!error && data?.length > 0) {
+        const latestCycleData = data[0]
+        setLatestCycle(latestCycleData)
+
+        // 🩷 Focus the calendar on predicted next period
+        const nextPredicted = calculateNextPeriodStart(latestCycleData)
+        setSelectedDate(nextPredicted)
+      } else {
+        setSelectedDate(new Date())
+      }
+
       setLoading(false)
     }
     fetchLatestCycle()
@@ -115,7 +131,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* ⬇️ Arrow & text directly below the calendar card */}
+          {/* ⬇️ Arrow + Text directly below calendar */}
           <div className="flex flex-col items-center justify-center mt-4">
             <p className="text-pink-600 font-cute text-lg mb-2">
               Scroll below for your comfort note 💌
@@ -143,12 +159,12 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* 💌 Envelope Section - moved upward */}
-      <div className="mt-4 -mb-4">  {/* 👈 adjusted margin spacing */}
+      {/* 💌 Envelope Section (nudged upward) */}
+      <div className="mt-4 -mb-4">
         <AEnvelope phaseInfo={phaseInfo} />
       </div>
 
-      {/* 💬 Chatbot */}
+      {/* 💬 Floating Chatbot */}
       <ChatButton phaseInfo={phaseInfo} />
     </div>
   )
